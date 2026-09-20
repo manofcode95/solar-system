@@ -24,5 +24,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+      
+      - name: Show CI diagnostics
+        run: |
+          echo "Runner IP: $(curl -4s https://api.ipify.org)"
+          node -e "for (const k of ['MONGO_URI','MONGO_USERNAME','MONGO_PASSWORD']) console.log(k + ': ' + (process.env[k] ? 'present' : 'missing'))"
+
       - name: Run tests
         run: npm test
