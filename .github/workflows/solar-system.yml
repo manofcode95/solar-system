@@ -11,7 +11,7 @@ env:
   MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
   MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 jobs:
-  test:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -33,4 +33,26 @@ jobs:
         with:
           name: test-results
           path: test-results.xml
+  coverage-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout code
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run coverage tests
+        run: npm run coverage
       
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-results
+          path: coverage
+          retention-days: 5
