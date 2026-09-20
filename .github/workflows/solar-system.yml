@@ -24,47 +24,13 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-      
-      - name: Show CI diagnostics
-        run: |
-          echo "Runner IP: $(curl -4s https://api.ipify.org)"
-          node -e "for (const k of ['MONGO_URI','MONGO_USERNAME','MONGO_PASSWORD']) console.log(k + ': ' + (process.env[k] ? 'present' : 'missing'))"
-      - name: Test MongoDB connection
-        run: |
-          node <<'NODE'
-          const mongoose = require('mongoose');
 
-          async function main() {
-            if (!process.env.MONGO_URI) {
-              throw new Error('MONGO_URI is missing');
-            }
-
-            const url = new URL(process.env.MONGO_URI);
-            console.log(`Testing MongoDB host: ${url.hostname}`);
-
-            try {
-              await mongoose.connect(process.env.MONGO_URI, {
-                user: process.env.MONGO_USERNAME,
-                pass: process.env.MONGO_PASSWORD,
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-                serverSelectionTimeoutMS: 10000
-              });
-
-              console.log('MongoDB connection succeeded');
-            } catch (error) {
-              console.error(`MongoDB connection failed: ${error.name}`);
-              console.error(error.message);
-              process.exitCode = 1;
-            } finally {
-              await mongoose.disconnect().catch(() => {});
-            }
-          }
-
-          main().catch(error => {
-            console.error(error.message);
-            process.exitCode = 1;
-          });
-          NODE
       - name: Run tests
         run: npm test
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results.xml
+      
