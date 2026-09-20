@@ -23,6 +23,7 @@
   "devDependencies": {
     "chai": "*",
     "chai-http": "*",
+    "dotenv": "^18.0.1",
     "mocha": "*"
   }
 }
