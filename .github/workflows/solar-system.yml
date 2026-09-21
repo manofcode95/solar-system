@@ -91,7 +91,7 @@ jobs:
           buildx-version: latest
           context: .
           push: false
-          tags: ${{ vars.DOCKER_USERNAME }}/solar-system-app:${{ github.sha }}
+          tags: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
       
       - name: Docker Image Test
         run: |
@@ -104,4 +104,3 @@ jobs:
             ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
           
           wget -q -O 127.0.0.1:3000/live | grep live
-        
