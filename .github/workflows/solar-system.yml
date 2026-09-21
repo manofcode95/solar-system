@@ -102,7 +102,7 @@ jobs:
           tags: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
       
       - name: GHCR Build
-        uses: docker/build-push action@v5
+        uses: docker/build-push-action@v5
         with:
           buildx-version: latest
           context: .
