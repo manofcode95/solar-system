@@ -103,4 +103,4 @@ jobs:
             -e MONGO_PASSWORD=$MONGO_PASSWORD \
             ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
           
-          wget -q -O 127.0.0.1:3000/live | grep live
+          wget -q -O - http://127.0.0.1:3000/live | grep live
