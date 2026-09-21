@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mongo-db:
-        image: siddhart67/mongo-db:non-prod
+        image: mongo
         ports:
           - 27017:27017
     env:
