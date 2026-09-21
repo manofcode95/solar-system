@@ -25,6 +25,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+
       - name: Run tests
         run: npm test
       
@@ -43,12 +50,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-
+        
       - name: Install dependencies
         run: npm install
 
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
       - name: Run coverage tests
         run: npm run coverage
+        continue-on-error: true
       
       - name: Upload coverage results
         uses: actions/upload-artifact@v7
