@@ -85,7 +85,7 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
  
-      - name: Docker Build and Push
+      - name: Docker Build
         uses: docker/build-push-action@v5
         with:
           buildx-version: latest
@@ -104,3 +104,11 @@ jobs:
             ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
           
           wget -q -O - http://127.0.0.1:3000/live | grep live
+
+      - name: Docker Push
+        uses: docker/build-push-action@v5
+        with:
+          buildx-version: latest
+          context: .
+          push: true
+          tags: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
