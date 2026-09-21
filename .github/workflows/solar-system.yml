@@ -73,6 +73,8 @@ jobs:
           retention-days: 5
 
   container:
+    permissions:
+      packages: write
     runs-on: ubuntu-latest
     needs: [unit-test, coverage-test]
     steps:
@@ -85,6 +87,12 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
  
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}          
       - name: Docker Build
         uses: docker/build-push-action@v5
         with:
@@ -93,6 +101,13 @@ jobs:
           push: false
           tags: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
       
+      - name: GHCR Build
+        uses: docker/build-push action@v5
+        with:
+          buildx-version: latest
+          context: .
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
       - name: Docker Image Test
         run: |
           docker images
@@ -112,3 +127,12 @@ jobs:
           context: .
           push: true
           tags: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+      
+      
+      - name: GHCR Push
+        uses: docker/build-push-action@v5
+        with:
+          buildx-version: latest
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
