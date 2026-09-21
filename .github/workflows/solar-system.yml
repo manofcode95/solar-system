@@ -20,8 +20,6 @@ jobs:
           - 27017:27017
     env:
         MONGO_URI: mongodb://localhost:27017/superData
-        MONGO_USERNAME: non-prod-user
-        MONGO_PASSWORD: non-prod-password
     steps:
       - uses: actions/checkout@v3
         name: Checkout code
@@ -60,8 +58,6 @@ jobs:
 
     env:
         MONGO_URI: mongodb://mongo-db:27017/superData
-        MONGO_USERNAME: non-prod-user
-        MONGO_PASSWORD: non-prod-password
 
     steps:
       - uses: actions/checkout@v3
@@ -122,7 +118,12 @@ jobs:
             -e MONGO_PASSWORD=$MONGO_PASSWORD \
             ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
           
-          wget -q -O - http://127.0.0.1:3000/live | grep live
+          for i in {1..10}; do
+            if wget -qO- http://127.0.0.1:3000/live | grep -q live; then
+              exit 0
+            fi
+            sleep 2
+          done
 
       - name: Docker Push
         uses: docker/build-push-action@v5
