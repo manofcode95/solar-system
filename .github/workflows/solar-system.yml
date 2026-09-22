@@ -146,11 +146,11 @@ jobs:
         with:
           version: 'v1.26.0'
       
-      - name: Save Ingress IP
-        id: ingress
-        run: |
-          echo "INGRESS_IP=$(kubectl -n ingress-nginx get svc ingress-nginx-controller \
-            -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
+      # - name: Save Ingress IP
+      #   id: ingress
+      #   run: |
+      #     echo "INGRESS_IP=$(kubectl -n ingress-nginx get svc ingress-nginx-controller \
+      #       -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
 
       
       - name: Replace tokens in manifests
@@ -163,9 +163,21 @@ jobs:
           NAMESPACE: ${{ vars.NAMESPACE }}
           REPLICAS: ${{ vars.REPLICAS }}
           IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/solar-system:${{ github.sha }}
-          INGRESS_IP: ${{ env.INGRESS_IP }}
+          INGRESS_IP: 127.0.0.1
       
       - name: Verify replaced manifests
         run: cat kubernetes/development/*.yaml
 
-
+      - name: Create MongoDB Secret
+        run: |
+          kubectl -n ${{ vars.NAMESPACE }} create secret generic mongo-db-creds \
+            --from-literal=MONGO_URI=${{ env.MONGO_URI }} \
+            --from-literal=MONGO_USERNAME=${{ env.MONGO_USERNAME }} \
+            --from-literal=MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
+            --save-config \
+            --dry-run=client \
+            -o yaml | kubectl apply -f -
+      
+      - name: Deploy to Dev Environment
+        run: |
+          kubectl apply -f kubernetes/development
