@@ -7,7 +7,7 @@ permissions: {}
 
 jobs:
   smoke-test:
-    runs-on: [self-hosted, macOS, ARM64, minikube]
+    runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     defaults:
       run:
