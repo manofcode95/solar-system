@@ -156,8 +156,8 @@ jobs:
       - name: Replace tokens in manifests
         uses: cschleiden/replace-tokens@v1
         with: 
-          tokenPrefix: '{_'
-          tokenSuffix: '_}'
+          tokenPrefix: '{'
+          tokenSuffix: '}'
           files: kubernetes/development/*.yaml
         env:
           NAMESPACE: ${{ vars.NAMESPACE }}
