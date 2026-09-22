@@ -140,6 +140,8 @@ jobs:
   deploy:
     needs: container
     runs-on: [self-hosted, macOS, ARM64]
+    outputs:
+      APP_INGRESS_URL: ${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
     steps:
       - name: Install kubectl CLI
         uses: azure/setup-kubectl@v3
@@ -181,3 +183,20 @@ jobs:
       - name: Deploy to Dev Environment
         run: |
           kubectl apply -f kubernetes/development
+    
+      - name: Set App Ingress Host Url
+        id: get-ingress-url
+        run: |
+          echo "APP_INGRESS_URL=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> $GITHUB_OUTPUT
+  
+  integration-test:
+    needs: deploy
+    runs-on: [self-hosted, macOS, ARM64]
+    steps:
+      - name: Test URL Output using curl and jq
+        env: 
+          URL: ${{ needs.deploy.outputs.APP_INGRESS_URL }}
+        run: |
+          echo $URL
+          echo "-------------------------"
+          curl https://$URL/live -s -k | jq -r .status  | grep -i live
