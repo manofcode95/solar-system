@@ -1,0 +1,28 @@
+name: Self-hosted Runner Smoke Test
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  smoke-test:
+    runs-on: [self-hosted, macOS, ARM64, minikube]
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Verify runner execution
+        run: |
+          printf 'Runner: %s\nOS: %s\nArchitecture: %s\n' "$RUNNER_NAME" "$RUNNER_OS" "$RUNNER_ARCH"
+          whoami
+          uname -m
+
+      - name: Verify local Minikube access
+        run: |
+          export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+          export KUBECONFIG="$HOME/.kube/config"
+          command -v kubectl
+          test -r "$KUBECONFIG"
+          kubectl --context minikube --request-timeout=15s get nodes

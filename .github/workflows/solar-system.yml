@@ -6,10 +6,6 @@ on:
       - main
       - feature/*
 
-env:
-  MONGO_URI: ${{ secrets.MONGO_URI }}
-  MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
-  MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 jobs:
   unit-test:
     runs-on: ubuntu-latest
@@ -85,9 +81,13 @@ jobs:
           retention-days: 5
 
   container:
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
+      MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
     permissions:
       packages: write
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64, minikube]
     needs: [unit-test, coverage-test]
     steps:
       - uses: actions/checkout@v3
@@ -111,19 +111,23 @@ jobs:
       - name: Docker Image Test
         run: |
           docker images
-          docker run --name solor-system -d \
+          docker run --name solar-system-${{ github.run_id }}-${{ github.run_attempt }} -d \
             -p 3000:3000 \
             -e MONGO_URI=$MONGO_URI \
             -e MONGO_USERNAME=$MONGO_USERNAME \
             -e MONGO_PASSWORD=$MONGO_PASSWORD \
             ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
-          
+
           for i in {1..10}; do
-            if wget -qO- http://127.0.0.1:3000/live | grep -q live; then
+            if curl --fail --silent http://127.0.0.1:3000/live | grep -q live; then
               exit 0
             fi
             sleep 2
           done
+
+      - name: Clean up test container
+        if: always()
+        run: docker rm --force solar-system-${{ github.run_id }}-${{ github.run_attempt }} || true
 
       - name: Docker Push
         uses: docker/build-push-action@v5
