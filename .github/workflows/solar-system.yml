@@ -87,7 +87,7 @@ jobs:
       MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
     permissions:
       packages: write
-    runs-on: [self-hosted, macOS, ARM64, minikube]
+    runs-on: [self-hosted, macOS, ARM64]
     needs: [unit-test, coverage-test]
     steps:
       - uses: actions/checkout@v3
