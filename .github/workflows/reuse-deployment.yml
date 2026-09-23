@@ -2,6 +2,9 @@ name: Deployment - Reuseable Workflow
 on: 
   workflow_call:
     inputs:
+      environment:
+        required: true
+        type: string
       kubectl-version:
         required: false
         default: 'v1.26.0'
