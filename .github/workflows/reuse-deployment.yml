@@ -29,6 +29,8 @@ on:
 jobs:
   reuse-deploy:
     runs-on: [self-hosted, macOS, ARM64]
+    environment:
+      name: ${{ inputs.environment }}
     outputs:
       APP_INGRESS_URL: ${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
     steps:
