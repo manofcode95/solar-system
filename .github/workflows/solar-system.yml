@@ -49,7 +49,6 @@ jobs:
           path: test-results.xml
   coverage-test:
     runs-on: ubuntu-latest
-    continue-on-error: true
     
     container:
       image: node:18
@@ -82,6 +81,7 @@ jobs:
 
       - name: Run coverage tests
         run: npm run coverage
+        continue-on-error: true
       
       - name: Upload coverage results
         uses: actions/upload-artifact@v7
@@ -156,7 +156,7 @@ jobs:
       k8s_path: kubernetes/development/*.yaml
       image: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
       namespace: ${{ vars.NAMESPACE }}
-      replicas: ${{ vars.REPLICAS }}
+      replicas: ${{ fromJSON(vars.REPLICAS) }}
       environment: production
     secrets:
       mongo-uri: ${{ secrets.MONGO_URI }}
