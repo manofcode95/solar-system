@@ -47,7 +47,7 @@ jobs:
 
       - name: Create MongoDB Secret
         run: |
-          kubectl -n ${{ inputs.namespace }} create secret generic mongo-db-creds \
+          kubectl -n ${{ vars.NAMESPACE }} create secret generic mongo-db-creds \
             --from-literal=MONGO_URI=${{ secrets.MONGO_URI }} \
             --save-config \
             --dry-run=client \
@@ -60,4 +60,4 @@ jobs:
       - name: Set App Ingress Host Url
         id: get-ingress-url
         run: |
-          echo "APP_INGRESS_URL=$(kubectl -n ${{ inputs.namespace }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> $GITHUB_OUTPUT
+          echo "APP_INGRESS_URL=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> $GITHUB_OUTPUT
