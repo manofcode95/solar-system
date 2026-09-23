@@ -154,11 +154,8 @@ jobs:
     with:
       k8s_path: kubernetes/development
       image: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
-      namespace: ${{ vars.NAMESPACE }}
-      replicas: ${{ fromJSON(vars.REPLICAS) }}
       environment: production
-    secrets:
-      mongo-uri: ${{ secrets.MONGO_URI }}
+  
 
   # integration-test:
   #   needs: prod-deploy

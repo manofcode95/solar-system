@@ -12,13 +12,6 @@ on:
       k8s_path:
         required: true
         type: string
-      namespace:
-        type: string
-        required: true
-      replicas:
-        required: false
-        default: 1
-        type: number
       image:
         required: true
         type: string
@@ -47,8 +40,8 @@ jobs:
           tokenSuffix: '}'
           files: ${{ inputs.k8s_path }}/*.yaml
         env:
-          NAMESPACE: ${{ inputs.namespace }}
-          REPLICAS: ${{ inputs.replicas }}
+          NAMESPACE: ${{ vars.NAMESPACE }}
+          REPLICAS: ${{ vars.REPLICAS }}
           K8S_IMAGE: ${{ inputs.image }}
           INGRESS_IP: 127.0.0.1
       
@@ -58,7 +51,7 @@ jobs:
       - name: Create MongoDB Secret
         run: |
           kubectl -n ${{ inputs.namespace }} create secret generic mongo-db-creds \
-            --from-literal=MONGO_URI=${{ secrets.mongo-uri }} \
+            --from-literal=MONGO_URI=${{ secrets.MONGO_URI }} \
             --save-config \
             --dry-run=client \
             -o yaml | kubectl apply -f -
