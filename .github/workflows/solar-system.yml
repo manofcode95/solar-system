@@ -152,7 +152,7 @@ jobs:
     needs: container
     uses: ./.github/workflows/reuse-deployment.yml
     with:
-      k8s_path: kubernetes/development/*.yaml
+      k8s_path: kubernetes/development
       image: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
       namespace: ${{ vars.NAMESPACE }}
       replicas: ${{ fromJSON(vars.REPLICAS) }}
