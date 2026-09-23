@@ -8,6 +8,40 @@ let chaiHttp = require("chai-http");
 chai.should();
 chai.use(chaiHttp); 
 
+const planets = [
+    { id: 1, name: 'Mercury' },
+    { id: 2, name: 'Venus' },
+    { id: 3, name: 'Earth' },
+    { id: 4, name: 'Mars' },
+    { id: 5, name: 'Jupiter' },
+    { id: 6, name: 'Saturn' },
+    { id: 7, name: 'Uranus' },
+    { id: 8, name: 'Neptune' }
+];
+
+before(async function() {
+    this.timeout(10000);
+
+    if (mongoose.connection.readyState !== 1) {
+        await new Promise((resolve, reject) => {
+            mongoose.connection.once('open', resolve);
+            mongoose.connection.once('error', reject);
+        });
+    }
+
+    const collection = mongoose.connection.collection('planets');
+    await collection.deleteMany({});
+    await collection.insertMany(planets);
+});
+
+after(async function() {
+    if (mongoose.connection.readyState === 1) {
+        await mongoose.connection.collection('planets').deleteMany({});
+    }
+
+    await mongoose.disconnect();
+});
+
 describe('Planets API Suite', () => {
 
     describe('Fetching Planet Details', () => {

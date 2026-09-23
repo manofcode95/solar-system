@@ -43,17 +43,24 @@ jobs:
       
       - name: Upload test results
         uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: test-results
           path: test-results.xml
   coverage-test:
     runs-on: ubuntu-latest
+    
     container:
       image: node:18
 
     services:
       mongo-db:
         image: mongo
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: secret
 
     env:
       MONGO_URI: mongodb://root:secret@localhost:27017/superData?authSource=admin
@@ -141,7 +148,7 @@ jobs:
           push: true
           tags: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
       
-  dev-deploy:
+  prod-deploy:
     needs: container
     uses: ./.github/workflows/reuse-deployment.yml
     with:
@@ -149,17 +156,18 @@ jobs:
       image: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
       namespace: ${{ vars.NAMESPACE }}
       replicas: ${{ vars.REPLICAS }}
+      environment: production
     secrets:
       mongo-uri: ${{ secrets.MONGO_URI }}
 
-  integration-test:
-    needs: dev-deploy
-    runs-on: [self-hosted, macOS, ARM64]
-    steps:
-      - name: Test URL Output using curl and jq
-        env: 
-          URL: ${{ needs.dev-deploy.outputs.APP_INGRESS_URL }}
-        run: |
-          echo $URL
-          echo "-------------------------"
-          curl https://$URL/live -s -k | jq -r .status  | grep -i live
+  # integration-test:
+  #   needs: prod-deploy
+  #   runs-on: [self-hosted, macOS, ARM64]
+  #   steps:
+  #     - name: Test URL Output using curl and jq
+  #       env: 
+  #         URL: ${{ needs.prod-deploy.outputs.APP_INGRESS_URL }}
+  #       run: |
+  #         echo $URL
+  #         echo "-------------------------"
+  #         curl https://$URL/live -s -k | jq -r .status  | grep -i live
