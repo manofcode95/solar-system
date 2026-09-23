@@ -15,13 +15,15 @@ on:
       image:
         required: true
         type: string
-
+    outputs:
+      application-url:
+        value: ${{ jobs.reuse-deploy.outputs.application-url }}
 jobs:
   reuse-deploy:
     runs-on: [self-hosted, macOS, ARM64]
     environment:
       name: ${{ inputs.environment }}
-      url: https://${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
+      url: ${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
     outputs:
       application-url: ${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
 
@@ -75,4 +77,4 @@ jobs:
       - name: Set App Ingress Host Url
         id: get-ingress-url
         run: |
-          echo "APP_INGRESS_URL=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> $GITHUB_OUTPUT
+          echo "APP_INGRESS_URL=https://$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> $GITHUB_OUTPUT
