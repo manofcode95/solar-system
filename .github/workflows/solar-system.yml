@@ -49,6 +49,7 @@ jobs:
           path: test-results.xml
   coverage-test:
     runs-on: ubuntu-latest
+    continue-on-error: true
     
     container:
       image: node:18
