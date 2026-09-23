@@ -21,8 +21,10 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     environment:
       name: ${{ inputs.environment }}
+      url: ${{ steps.get-ingress-url.outputs.url }}
     outputs:
       APP_INGRESS_URL: ${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
+
     steps:
       - name: Install kubectl CLI
         uses: azure/setup-kubectl@v3
@@ -53,6 +55,19 @@ jobs:
             --dry-run=client \
             -o yaml | kubectl apply -f -
       
+      - name: Ensure Kubernetes namespace exists
+        env:
+          NAMESPACE: ${{ vars.NAMESPACE }}
+        run: |
+          test -n "$NAMESPACE" || {
+            echo "::error::NAMESPACE environment variable is empty"
+            exit 1
+          }
+
+          kubectl create namespace "$NAMESPACE" \
+            --dry-run=client \
+            -o yaml | kubectl apply -f -
+
       - name: Deploy to Dev Environment
         run: |
           kubectl apply -f ${{ inputs.k8s_path }}
