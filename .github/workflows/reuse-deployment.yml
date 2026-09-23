@@ -21,7 +21,7 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     environment:
       name: ${{ inputs.environment }}
-      url: ${{ steps.get-ingress-url.outputs.url }}
+      url: https://${{ steps.get-ingress-url.outputs.url }}
     outputs:
       APP_INGRESS_URL: ${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
 
