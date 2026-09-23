@@ -18,7 +18,7 @@ jobs:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: secret
     env:
-        MONGO_URI: mongodb://root:secret@localhost:27017/superData
+        MONGO_URI: mongodb://root:secret@localhost:27017/superData?authSource=admin
     steps:
       - uses: actions/checkout@v3
         name: Checkout code
@@ -56,7 +56,7 @@ jobs:
         image: mongo
 
     env:
-        MONGO_URI: mongodb://mongo-db:27017/superData
+      MONGO_URI: mongodb://root:secret@localhost:27017/superData?authSource=admin
 
     steps:
       - uses: actions/checkout@v3
@@ -74,10 +74,10 @@ jobs:
 
       - name: Run coverage tests
         run: npm run coverage
-        continue-on-error: true
       
       - name: Upload coverage results
         uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: coverage-results
           path: coverage
@@ -127,6 +127,7 @@ jobs:
             fi
             sleep 2
           done
+          exit 1
 
       - name: Clean up test container
         if: always()
@@ -157,7 +158,7 @@ jobs:
     steps:
       - name: Test URL Output using curl and jq
         env: 
-          URL: ${{ needs.deploy.outputs.APP_INGRESS_URL }}
+          URL: ${{ needs.dev-deploy.outputs.APP_INGRESS_URL }}
         run: |
           echo $URL
           echo "-------------------------"
