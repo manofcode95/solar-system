@@ -23,7 +23,7 @@ jobs:
       name: ${{ inputs.environment }}
       url: https://${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
     outputs:
-      APP_INGRESS_URL: ${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
+      application-url: ${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
 
     steps:
       - name: Install kubectl CLI
