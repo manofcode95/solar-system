@@ -137,60 +137,18 @@ jobs:
           push: true
           tags: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
       
-  deploy:
+  dev-deploy:
     needs: container
-    runs-on: [self-hosted, macOS, ARM64]
-    outputs:
-      APP_INGRESS_URL: ${{ steps.get-ingress-url.outputs.APP_INGRESS_URL }}
-    steps:
-      - name: Install kubectl CLI
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'v1.26.0'
-      
-      # - name: Save Ingress IP
-      #   id: ingress
-      #   run: |
-      #     echo "INGRESS_IP=$(kubectl -n ingress-nginx get svc ingress-nginx-controller \
-      #       -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
+    uses: ./.github/workflows/reuse-deployment.yml
+    with:
+      k8s_path: kubernetes/development/*.yaml
+      image: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+      namespace: ${{ vars.NAMESPACE }}
+    secrets:
+      mongo-uri: ${{ secrets.MONGO_URI }}
 
-      
-      - name: Replace tokens in manifests
-        uses: cschleiden/replace-tokens@v1
-        with: 
-          tokenPrefix: '${'
-          tokenSuffix: '}'
-          files: kubernetes/development/*.yaml
-        env:
-          NAMESPACE: ${{ vars.NAMESPACE }}
-          REPLICAS: ${{ vars.REPLICAS }}
-          K8S_IMAGE: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
-          INGRESS_IP: 127.0.0.1
-      
-      - name: Verify replaced manifests
-        run: cat kubernetes/development/*.yaml
-
-      - name: Create MongoDB Secret
-        run: |
-          kubectl -n ${{ vars.NAMESPACE }} create secret generic mongo-db-creds \
-            --from-literal=MONGO_URI=${{ env.MONGO_URI }} \
-            --from-literal=MONGO_USERNAME=${{ env.MONGO_USERNAME }} \
-            --from-literal=MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
-            --save-config \
-            --dry-run=client \
-            -o yaml | kubectl apply -f -
-      
-      - name: Deploy to Dev Environment
-        run: |
-          kubectl apply -f kubernetes/development
-    
-      - name: Set App Ingress Host Url
-        id: get-ingress-url
-        run: |
-          echo "APP_INGRESS_URL=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> $GITHUB_OUTPUT
-  
   integration-test:
-    needs: deploy
+    needs: dev-deploy
     runs-on: [self-hosted, macOS, ARM64]
     steps:
       - name: Test URL Output using curl and jq
